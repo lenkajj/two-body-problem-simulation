@@ -120,8 +120,8 @@ while running:
     Vc_y = (m1 * vy1 + m2 * vy2) / (m1 + m2)
     Vc = np.sqrt(Vc_x**2 + Vc_y**2)
 
-    # ...and subtract it from the absolute velocities and positions 
-    # to keep the center of mass fixed at the center of the screen.
+    # ...and we can subtract it from the absolute velocities and positions 
+    # to keep the center of mass fixed at the center of the screen, so the stars dont "run away".
 
     # planet velocities relative to the center of mass(that velocitie is displayed)
     V1_rel_x = vx1-Vc_x
@@ -138,7 +138,7 @@ while running:
     view_y = (m1 * position_y1 + m2 * position_y2) / (m1 + m2)
 
     # ==================== SCREEN COORDINATES ====================
-    # The center-of-mass motion is removed from the visualization
+    # if we want the center-of-mass motion is removed from the visualization:
 
     screen_x1 = int(
         width / 2 + (position_x1 - view_x) * scale
@@ -153,7 +153,21 @@ while running:
     screen_y2 = int(
         height / 2 - (position_y2 - view_y) * scale
     )
+    #if we want to see real motion:
+    #screen_x1 = int(
+    #    width / 2 + (position_x1) * scale
+    #)
+    #screen_y1 = int(
+    #    height / 2 - (position_y1) * scale
+    #)
 
+    #screen_x2 = int(
+    #    width / 2 + (position_x2) * scale
+    #)
+    #screen_y2 = int(
+    #    height / 2 - (position_y2) * scale
+    #)
+    
     # Add the current positions to the trajectories
     planet_path1.append((screen_x1, screen_y1))
     planet_path2.append((screen_x2, screen_y2))
