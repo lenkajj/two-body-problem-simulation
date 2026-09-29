@@ -17,7 +17,7 @@ x2, y2 = -6, 0
 v1_0, theta1 = 0.376, np.pi / 3
 v2_0, theta2 = 0.5, -np.pi
 
-vx1_0 = v1_0 * abs(np.cos(theta1))
+vx1_0 = v1_0 * np.cos(theta1)
 vy1_0 = v1_0 * np.sin(theta1)
 
 vx2_0 = v2_0 * np.cos(theta2)
@@ -40,7 +40,7 @@ def gravity(t, y):
     ax2 = G * m1 * (x1 - x2) / r**3
     ay2 = G * m1 * (y1 - y2) / r**3
 
-    return [vx1, vy1, ax1, ay1, vx2, vy2, ax2, ay2]
+    return [vx1, vy1, ax1, ay1, vx2, vy2, ax2, ay2] # the solver differentiates y: positions return velocities (dx/dt = v), velocities return accelerations (dv/dt = a). 
 
 initial_conditions = [x1, y1, vx1_0, vy1_0, x2, y2, vx2_0, vy2_0]
 
@@ -68,7 +68,7 @@ planet_path2 = []
 t = 0
 dt = 0.1
 
-# Scale: 1 unit of distance = 50 pixels
+# scale: 1 unit of distance = 50 pixels
 scale = 50
 
 
@@ -91,8 +91,7 @@ while running:
     new = sol.y[:, -1]
 
     # Current positions and velocities
-    position_x1, position_y1, vx1, vy1, \
-    position_x2, position_y2, vx2, vy2 = new
+    position_x1, position_y1, vx1, vy1, position_x2, position_y2, vx2, vy2 = new
 
     initial_conditions = new
 
@@ -114,10 +113,24 @@ while running:
 
     # ==================== CENTER OF MASS ====================
 
-    # Center-of-mass velocity
+    # Due to the conservation of momentum, the system as a whole can have 
+    # a net linear velocity, causing it to drift across the screen.
+    # We calculate the center-of-mass velocity (Vc) to compensate for this drift...
     Vc_x = (m1 * vx1 + m2 * vx2) / (m1 + m2)
     Vc_y = (m1 * vy1 + m2 * vy2) / (m1 + m2)
     Vc = np.sqrt(Vc_x**2 + Vc_y**2)
+
+    # ...and subtract it from the absolute velocities and positions 
+    # to keep the center of mass fixed at the center of the screen.
+
+    # planet velocities relative to the center of mass(that velocitie is displayed)
+    V1_rel_x = vx1-Vc_x
+    V1_rel_y = vy1-Vc_y 
+    V1_rel = np.sqrt(V1_rel_x**2+V1_rel_y**2)
+
+    V2_rel_x = vx2-Vc_x
+    V2_rel_y = vy2-Vc_y
+    V2_rel = np.sqrt(V2_rel_x**2+V2_rel_y**2)
 
     # Center-of-mass position
     # The camera is fixed to the center of mass
@@ -144,6 +157,7 @@ while running:
     # Add the current positions to the trajectories
     planet_path1.append((screen_x1, screen_y1))
     planet_path2.append((screen_x2, screen_y2))
+    
 
     # ==================== DRAWING ====================
 
@@ -171,41 +185,20 @@ while running:
 
     # ==================== TEXT INFORMATION ====================
 
-    # Velocity of planet 1
-    velocity1_text = font.render(
-        f"v1 = {velocity1:.3f}", True, black
-    )
+    # Velocity text of planet 1
+    velocity1_text = font.render(f"v1 = {V1_rel:.3f}", True, black)
 
-    screen.blit(
-        velocity1_text,
-        (
-            screen_x1 - velocity1_text.get_width() // 2,
-            screen_y1 - 30
-        )
-    )
+    screen.blit(velocity1_text, (screen_x1 - velocity1_text.get_width() // 2, screen_y1 - 30))
 
-    # Velocity of planet 2
-    velocity2_text = font.render(
-        f"v2 = {velocity2:.3f}", True, black
-    )
+    # Velocity text of planet 2
+    velocity2_text = font.render(f"v2 = {V2_rel:.3f}", True, black)
 
-    screen.blit(
-        velocity2_text,
-        (
-            screen_x2 - velocity2_text.get_width() // 2,
-            screen_y2 - 30
-        )
-    )
+    screen.blit(velocity2_text,(screen_x2 - velocity2_text.get_width() // 2, screen_y2 - 30))
 
     # Center-of-mass velocity
-    Vc_text = font.render(
-        f"Vc = {Vc:.3f}", True, black
-    )
+    Vc_text = font.render(f"Vc = {Vc:.3f}", True, black)
 
-    screen.blit(
-        Vc_text,
-        (10, 10)
-    )
+    screen.blit(Vc_text, (10, 10))
 
     pygame.display.flip()
     clock.tick(60)
