@@ -10,12 +10,12 @@ m2 = 125634626556
 G = 6.67428e-11
 
 # Initial positions
-x1, y1 = 5, 0
-x2, y2 = -6, 0
+x1, y1 = 3, 0
+x2, y2 = -3, 0
 
 # Initial velocities and angles
-v1_0, theta1 = 0.376, np.pi / 3
-v2_0, theta2 = 0.5, -np.pi
+v1_0, theta1 = 0.276, np.pi / 2
+v2_0, theta2 = 0.4, -np.pi/3
 
 vx1_0 = v1_0 * np.cos(theta1)
 vy1_0 = v1_0 * np.sin(theta1)
